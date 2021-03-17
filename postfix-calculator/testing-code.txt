@@ -1,0 +1,92 @@
+package main
+
+import (
+	"fmt"
+	//"reflect"
+	"regexp"
+	"strings"
+
+	//	"strings"
+)
+
+// import "./stack"
+func delWhiteSpace(s string) string {
+	var re = regexp.MustCompile(`[[:space:]]`)
+	s1 := re.ReplaceAllString(s, "")
+
+	return s1
+
+}
+func isEmpty(s []string) bool {
+	if len(s) == 0 {return true}
+	return false
+}
+
+func pop(s []string) (string,[]string) {
+	return s[len(s)-1],s[:len(s)-1]
+}
+
+func infixToPostfix(infixexpr string) string {
+	prec := map[string]int{}
+	prec["*"] = 3
+	prec["/"] = 3
+	prec["+"] = 2
+	prec["-"] = 2
+	prec["("] = 1
+
+	operationStack := []string{}
+
+	postfixSlice := []string{}
+	tokenStr := delWhiteSpace(infixexpr)
+
+	fmt.Println(tokenStr)
+    for _, token := range tokenStr {
+    	fmt.Println(string(token))
+		if strings.Contains("abcdefghijklmnopqrstuvwxyz", string(token)) ||
+			strings.Contains("0123456789", string(token)) {
+
+			postfixSlice = append(postfixSlice, string(token))
+		//	fmt.Println(postfixSlice)
+		} else if token == '(' {
+			operationStack = append(operationStack, string(token))
+		} else if token == ')' {
+			fmt.Println("правая скобочка", string(token), operationStack, len(operationStack))
+		    elem, operationStack := pop(operationStack)
+		//	postfixSlice = append(postfixSlice, elem)
+			for elem != "("  && !isEmpty(operationStack){
+				postfixSlice = append(postfixSlice, elem)
+				fmt.Println("Заход 1", postfixSlice)
+				fmt.Println("Заход 2", operationStack, len(operationStack))
+			    elem, operationStack = pop(operationStack)
+
+			}
+		} else {
+		//	fmt.Println(operationStack)
+
+			for !isEmpty(operationStack) && (prec[operationStack[len(operationStack)-1]] >= prec[string(token)]) {
+				fmt.Println(operationStack)
+				fmt.Println("Operation: ", prec[operationStack[len(operationStack)-1]] ,  prec[string(token)])
+				elem := operationStack[len(operationStack)-1]
+				operationStack = operationStack[:len(operationStack)-1]
+				postfixSlice = append(postfixSlice, elem)
+
+			}
+			operationStack = append(operationStack, string(token))
+		}
+	}
+		for !isEmpty(operationStack) {
+
+			elem, _ := pop(operationStack)
+			postfixSlice = append(postfixSlice, elem)
+
+		}
+	return strings.Join(postfixSlice, " ")
+}
+
+
+
+func main() {
+   // fmt.Println(infixToPostfix("    1+2+3*7/5  "))
+    fmt.Println(infixToPostfix("( A + B ) * C - ( D - E ) * ( F + G )"))
+
+}
